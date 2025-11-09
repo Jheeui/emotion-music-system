@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:3001/api';
 
 class API {
   constructor() {
@@ -14,11 +14,16 @@ class API {
 
   async getLoginUrl() {
     const response = await this.client.get('/auth/login');
-    return response.data.url;
+    return response.data;
   }
 
   async authenticateWithCode(code) {
     const response = await this.client.post('/auth/callback', { code });
+    return response.data;
+  }
+
+  async refreshToken(refreshToken) {
+    const response = await this.client.post('/auth/refresh', { refreshToken });
     return response.data;
   }
 

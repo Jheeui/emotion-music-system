@@ -1,0 +1,295 @@
+.macbook {
+  background-color: #ffffff;
+  overflow: hidden;
+  border: 1px solid;
+  border-color: transparent;
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  min-width: 1152px;
+  min-height: 700px;
+}
+
+.macbook .rectangle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 70%;
+  height: 91%;
+  background-color: #82cdde87;
+}
+
+.macbook .div {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 59px;
+  background-color: #242323;
+}
+
+.macbook .rectangle-2 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 30%;
+  min-width: 347px;
+  height: 91%;
+  background-color: #64bdea;
+  border: 1px solid;
+  border-color: #e6e6e6bd;
+}
+
+.macbook .text-wrapper {
+  position: absolute;
+  top: 15px;
+  right: calc(30% - 310px);
+  width: 192px;
+  font-family: "Puritan-Bold", Helvetica;
+  font-weight: 700;
+  color: #363636;
+  font-size: 25px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .rectangle-10 {
+  position: absolute;
+  top: 22px;
+  left: 92px;
+  width: 50%;
+  max-width: 572px;
+  height: 47px;
+  background-color: #ffffff;
+}
+
+.macbook .rectangle-11 {
+  position: absolute;
+  top: 83px;
+  left: 20px;
+  width: 60%;
+  max-width: 707px;
+  height: 224px;
+  background-color: #64beebf0;
+}
+
+.macbook .p {
+  position: absolute;
+  top: 37px;
+  left: 102px;
+  width: 389px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #000000a6;
+  font-size: 12px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .text-wrapper-18 {
+  position: absolute;
+  top: 172px;
+  left: 46px;
+  width: 294px;
+  font-family: "Puritan-Bold", Helvetica;
+  font-weight: 700;
+  color: #000000;
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .text-wrapper-19 {
+  position: absolute;
+  top: 194px;
+  left: 45px;
+  width: 294px;
+  -webkit-text-stroke: 1px #000000fc;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #00000030;
+  font-size: 12px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .rectangle-37 {
+  position: absolute;
+  top: 233px;
+  left: 49px;
+  width: 186px;
+  height: 33px;
+  background-color: #000000;
+}
+
+.macbook .text-wrapper-20 {
+  position: absolute;
+  top: 236px;
+  left: 95px;
+  width: 60px;
+  font-family: "Raleway-Bold", Helvetica;
+  font-weight: 700;
+  color: #64bdea;
+  font-size: 20px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.macbook .text-wrapper-28 {
+  position: absolute;
+  top: 330px;
+  left: 20px;
+  width: 197px;
+  font-family: "Raleway-Bold", Helvetica;
+  font-weight: 700;
+  color: #000000;
+  font-size: 17px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.macbook .text-wrapper-29 {
+  position: absolute;
+  top: 518px;
+  left: 20px;
+  width: 197px;
+  font-family: "Raleway-Bold", Helvetica;
+  font-weight: 700;
+  color: #000000;
+  font-size: 17px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.macbook .rectangle-27 {
+  position: absolute;
+  bottom: 11px;
+  left: 18px;
+  width: 44px;
+  height: 48px;
+  object-fit: cover;
+}
+
+.macbook .text-wrapper-4 {
+  position: absolute;
+  bottom: 6px;
+  left: 71px;
+  width: 170px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #64bdea;
+  font-size: 13px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.macbook .text-wrapper-5 {
+  position: absolute;
+  bottom: -15px;
+  left: 71px;
+  width: 170px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #ffffff87;
+  font-size: 9px;
+  letter-spacing: 0;
+  line-height: normal;
+}
+
+.macbook .ellipse {
+  position: absolute;
+  bottom: 8px;
+  left: 262px;
+  width: 31px;
+  height: 31px;
+  background-color: #3e3e3e;
+  border-radius: 15.5px;
+}
+
+.macbook .pause-2 {
+  position: absolute;
+  bottom: 13px;
+  left: 265px;
+  width: 25px;
+  height: 22px;
+  background-color: #64beeb82;
+  box-shadow: 0px 4px 4px #00000040;
+}
+
+.macbook .text-wrapper-30 {
+  bottom: 9px;
+  left: 356px;
+  position: absolute;
+  width: 32px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 9px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .text-wrapper-31 {
+  bottom: 6px;
+  right: calc(30% + 50px);
+  position: absolute;
+  width: 32px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #ffffff;
+  font-size: 9px;
+  letter-spacing: 0;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.macbook .text-wrapper-32 {
+  position: absolute;
+  top: 35px;
+  left: 20px;
+  width: 42px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "PT Mono-Regular", Helvetica;
+  font-weight: 400;
+  color: #000000;
+  font-size: 25px;
+  text-align: center;
+  letter-spacing: 0.88px;
+  line-height: 23.6px;
+  white-space: nowrap;
+}
+
+/* 감정 선택 버튼 스타일 */
+.emotion-button {
+  position: absolute;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+}
+
+.emotion-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.emotion-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.emotion-button.selected {
+  box-shadow: 0 0 15px rgba(100, 189, 234, 0.8);
+  border: 3px solid #64bdea !important;
+}
