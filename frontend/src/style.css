@@ -8,275 +8,105 @@
   position: relative;
   min-width: 1152px;
   min-height: 700px;
-}
-
-.macbook .rectangle {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 70%;
-  height: 91%;
-  background-color: #82cdde87;
-}
-
-.macbook .div {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 59px;
-  background-color: #242323;
-}
-
-.macbook .rectangle-2 {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 30%;
-  min-width: 347px;
-  height: 91%;
-  background-color: #64bdea;
-  border: 1px solid;
-  border-color: #e6e6e6bd;
-}
-
-.macbook .text-wrapper {
-  position: absolute;
-  top: 15px;
-  right: calc(30% - 310px);
-  width: 192px;
-  font-family: "Puritan-Bold", Helvetica;
-  font-weight: 700;
-  color: #363636;
-  font-size: 25px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .rectangle-10 {
-  position: absolute;
-  top: 22px;
-  left: 92px;
-  width: 50%;
-  max-width: 572px;
-  height: 47px;
-  background-color: #ffffff;
-}
-
-.macbook .rectangle-11 {
-  position: absolute;
-  top: 83px;
-  left: 20px;
-  width: 60%;
-  max-width: 707px;
-  height: 224px;
-  background-color: #64beebf0;
-}
-
-.macbook .p {
-  position: absolute;
-  top: 37px;
-  left: 102px;
-  width: 389px;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #000000a6;
-  font-size: 12px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .text-wrapper-18 {
-  position: absolute;
-  top: 172px;
-  left: 46px;
-  width: 294px;
-  font-family: "Puritan-Bold", Helvetica;
-  font-weight: 700;
-  color: #000000;
-  font-size: 16px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .text-wrapper-19 {
-  position: absolute;
-  top: 194px;
-  left: 45px;
-  width: 294px;
-  -webkit-text-stroke: 1px #000000fc;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #00000030;
-  font-size: 12px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .rectangle-37 {
-  position: absolute;
-  top: 233px;
-  left: 49px;
-  width: 186px;
-  height: 33px;
-  background-color: #000000;
-}
-
-.macbook .text-wrapper-20 {
-  position: absolute;
-  top: 236px;
-  left: 95px;
-  width: 60px;
-  font-family: "Raleway-Bold", Helvetica;
-  font-weight: 700;
-  color: #64bdea;
-  font-size: 20px;
-  letter-spacing: 0;
-  line-height: normal;
-}
-
-.macbook .text-wrapper-28 {
-  position: absolute;
-  top: 330px;
-  left: 20px;
-  width: 197px;
-  font-family: "Raleway-Bold", Helvetica;
-  font-weight: 700;
-  color: #000000;
-  font-size: 17px;
-  letter-spacing: 0;
-  line-height: normal;
-}
-
-.macbook .text-wrapper-29 {
-  position: absolute;
-  top: 518px;
-  left: 20px;
-  width: 197px;
-  font-family: "Raleway-Bold", Helvetica;
-  font-weight: 700;
-  color: #000000;
-  font-size: 17px;
-  letter-spacing: 0;
-  line-height: normal;
-}
-
-.macbook .rectangle-27 {
-  position: absolute;
-  bottom: 11px;
-  left: 18px;
-  width: 44px;
-  height: 48px;
-  object-fit: cover;
-}
-
-.macbook .text-wrapper-4 {
-  position: absolute;
-  bottom: 6px;
-  left: 71px;
-  width: 170px;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #64bdea;
-  font-size: 13px;
-  letter-spacing: 0;
-  line-height: normal;
-}
-
-.macbook .text-wrapper-5 {
-  position: absolute;
-  bottom: -15px;
-  left: 71px;
-  width: 170px;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #ffffff87;
-  font-size: 9px;
-  letter-spacing: 0;
-  line-height: normal;
-}
-
-.macbook .ellipse {
-  position: absolute;
-  bottom: 8px;
-  left: 262px;
-  width: 31px;
-  height: 31px;
-  background-color: #3e3e3e;
-  border-radius: 15.5px;
-}
-
-.macbook .pause-2 {
-  position: absolute;
-  bottom: 13px;
-  left: 265px;
-  width: 25px;
-  height: 22px;
-  background-color: #64beeb82;
-  box-shadow: 0px 4px 4px #00000040;
-}
-
-.macbook .text-wrapper-30 {
-  bottom: 9px;
-  left: 356px;
-  position: absolute;
-  width: 32px;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #ffffff;
-  font-size: 9px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .text-wrapper-31 {
-  bottom: 6px;
-  right: calc(30% + 50px);
-  position: absolute;
-  width: 32px;
-  font-family: "Raleway-Medium", Helvetica;
-  font-weight: 500;
-  color: #ffffff;
-  font-size: 9px;
-  letter-spacing: 0;
-  line-height: normal;
-  white-space: nowrap;
-}
-
-.macbook .text-wrapper-32 {
-  position: absolute;
-  top: 35px;
-  left: 20px;
-  width: 42px;
-  height: 20px;
   display: flex;
-  align-items: center;
   justify-content: center;
+  align-items: center;
+}
+
+/* 메인 컨테이너 */
+.main-container {
+  position: relative;
+  width: 90%;
+  max-width: 1400px;
+  height: 90vh;
+  display: flex;
+  gap: 20px;
+}
+
+/* 왼쪽 영역 */
+.left-section {
+  flex: 1;
+  background-color: #82cdde87;
+  border-radius: 15px;
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  overflow-y: auto;
+}
+
+/* 오른쪽 영역 */
+.right-section {
+  width: 350px;
+  background-color: #64bdea;
+  border-radius: 15px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+/* 헤더 영역 */
+.header-area {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.logo {
   font-family: "PT Mono-Regular", Helvetica;
   font-weight: 400;
   color: #000000;
-  font-size: 25px;
-  text-align: center;
+  font-size: 28px;
   letter-spacing: 0.88px;
-  line-height: 23.6px;
-  white-space: nowrap;
 }
 
-/* 감정 선택 버튼 스타일 */
+.header-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+/* 검색바 */
+.search-bar {
+  width: 100%;
+  height: 50px;
+  background-color: #ffffff;
+  border-radius: 10px;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.search-bar input {
+  border: none;
+  outline: none;
+  width: 100%;
+  font-family: "Raleway-Medium", Helvetica;
+  font-size: 13px;
+  color: #000000a6;
+}
+
+/* 감정 선택 버튼 영역 */
+.emotion-buttons-area {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
 .emotion-button {
-  position: absolute;
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 5px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
+  height: 100px;
+  background: #64beebf0;
+  border: 2px solid #333;
 }
 
 .emotion-button:hover:not(:disabled) {
@@ -292,4 +122,381 @@
 .emotion-button.selected {
   box-shadow: 0 0 15px rgba(100, 189, 234, 0.8);
   border: 3px solid #64bdea !important;
+}
+
+.emotion-button-content {
+  text-align: center;
+}
+
+.emotion-icon {
+  font-size: 40px;
+  margin-bottom: 8px;
+}
+
+.emotion-label {
+  font-size: 14px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* 추천 트랙 영역 */
+.recommend-section {
+  background-color: #64beebf0;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 20px;
+}
+
+.recommend-title {
+  font-family: "Puritan-Bold", Helvetica;
+  font-weight: 700;
+  color: #000000;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.recommend-subtitle {
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #00000052;
+  font-size: 13px;
+  margin-bottom: 20px;
+}
+
+.play-button {
+  width: 100%;
+  max-width: 200px;
+  height: 40px;
+  background-color: #000000;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.play-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+.play-button-text {
+  font-family: "Raleway-Bold", Helvetica;
+  font-weight: 700;
+  color: #64bdea;
+  font-size: 18px;
+}
+
+/* 섹션 타이틀 */
+.section-title {
+  font-family: "Raleway-Bold", Helvetica;
+  font-weight: 700;
+  color: #000000;
+  font-size: 18px;
+  margin-bottom: 15px;
+}
+
+/* 오른쪽 트랙 리스트 */
+.tracks-title {
+  font-family: "Puritan-Bold", Helvetica;
+  font-weight: 700;
+  color: #363636;
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.track-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.track-item:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateX(5px);
+}
+
+.track-item.special {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 15px 10px;
+}
+
+.track-item.special:hover {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.track-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.track-item.special .track-cover {
+  width: 60px;
+  height: 60px;
+}
+
+.track-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.track-name {
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #000000;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track-item.special .track-name {
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.track-artist {
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #00000052;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+.track-item.special .track-artist {
+  color: #ffffff87;
+}
+
+.track-heart {
+  font-size: 20px;
+  cursor: pointer;
+  transition: transform 0.2s;
+  flex-shrink: 0;
+}
+
+.track-heart:hover {
+  transform: scale(1.2);
+}
+
+/* 하단 재생 바 */
+.bottom-player {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background-color: #242323;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 20px;
+  z-index: 1000;
+}
+
+.player-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  object-fit: cover;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+}
+
+.player-track-name {
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #64bdea;
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.player-artist-name {
+  font-family: "Raleway-Medium", Helvetica;
+  font-weight: 500;
+  color: #ffffff87;
+  font-size: 11px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-top: 4px;
+}
+
+.player-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex: 1;
+}
+
+.play-pause-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #64bdea;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  color: #000;
+  border: none;
+}
+
+.play-pause-btn:hover {
+  background-color: #52a8d4;
+  transform: scale(1.1);
+}
+
+.progress-bar-container {
+  flex: 1;
+  max-width: 500px;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #666;
+  border-radius: 2px;
+  position: relative;
+}
+
+.progress-fill {
+  height: 100%;
+  background: #64bdea;
+  border-radius: 2px;
+  width: 30%;
+}
+
+.time-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  font-family: "Raleway-Medium", Helvetica;
+  font-size: 11px;
+  color: #ffffff;
+}
+
+/* 버튼 공통 스타일 */
+button {
+  font-family: inherit;
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  background: #2196f3;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: #1976d2;
+  transform: translateY(-2px);
+}
+
+.btn-danger {
+  padding: 10px 20px;
+  background: #ff6b6b;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+  background: #ee5a52;
+  transform: translateY(-2px);
+}
+
+.btn-warning {
+  padding: 10px 20px;
+  background: #ff9800;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.btn-warning:hover {
+  background: #f57c00;
+  transform: translateY(-2px);
+}
+
+/* Player 상태 표시 */
+.player-status {
+  padding: 8px 16px;
+  background: #ffa500;
+  color: white;
+  border-radius: 10px;
+  fontSize: 12px;
+  font-weight: bold;
+}
+
+/* 로딩 표시 */
+.loading-text {
+  text-align: center;
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
+  padding: 40px;
+}
+
+/* 스크롤바 스타일 */
+.left-section::-webkit-scrollbar,
+.right-section::-webkit-scrollbar {
+  width: 8px;
+}
+
+.left-section::-webkit-scrollbar-track,
+.right-section::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}
+
+.left-section::-webkit-scrollbar-thumb,
+.right-section::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+}
+
+.left-section::-webkit-scrollbar-thumb:hover,
+.right-section::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.5);
 }
