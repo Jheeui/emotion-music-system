@@ -10,20 +10,28 @@ function App() {
   const [currentEmotion, setCurrentEmotion] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
+  const [selectedTrack, setSelectedTrack] = useState(null); // 선택된 트랙 (재생 X)
   const [isLoading, setIsLoading] = useState(false);
   
-  // 웹캠 관련 state
   const [showWebcam, setShowWebcam] = useState(false);
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedEmotion, setDetectedEmotion] = useState(null);
   const [confidence, setConfidence] = useState(0);
   const videoRef = useRef(null);
 
-  // Spotify Player 관련 state
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [playerReady, setPlayerReady] = useState(false);
+
+  const [currentPosition, setCurrentPosition] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [repeatMode, setRepeatMode] = useState('off');
+  const [shuffleMode, setShuffleMode] = useState(false);
+
+  const [recentTracks, setRecentTracks] = useState([]);
+
+  const positionIntervalRef = useRef(null);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -53,63 +61,19 @@ function App() {
     }
   }, []);
 
-  // Spotify Player 초기화
   useEffect(() => {
     if (accessToken && !player) {
       console.log('🔵 Spotify Player 초기화 시작');
       
+      // SDK 로드 전에 콜백 함수 먼저 정의
       window.onSpotifyWebPlaybackSDKReady = () => {
-        const spotifyPlayer = new window.Spotify.Player({
-          name: 'Emotion Tracks Player',
-          getOAuthToken: cb => { cb(accessToken); },
-          volume: 0.5
-        });
-
-        // 에러 처리
-        spotifyPlayer.addListener('initialization_error', ({ message }) => {
-          console.error('❌ 초기화 에러:', message);
-        });
-        spotifyPlayer.addListener('authentication_error', ({ message }) => {
-          console.error('❌ 인증 에러:', message);
-        });
-        spotifyPlayer.addListener('account_error', ({ message }) => {
-          console.error('❌ 계정 에러:', message);
-        });
-        spotifyPlayer.addListener('playback_error', ({ message }) => {
-          console.error('❌ 재생 에러:', message);
-        });
-
-        // Ready
-        spotifyPlayer.addListener('ready', ({ device_id }) => {
-          console.log('✅ Spotify Player Ready! Device ID:', device_id);
-          setDeviceId(device_id);
-          setPlayerReady(true);
-        });
-
-        // Not Ready
-        spotifyPlayer.addListener('not_ready', ({ device_id }) => {
-          console.log('⚠️ Device ID has gone offline', device_id);
-        });
-
-        // Player state changes
-        spotifyPlayer.addListener('player_state_changed', state => {
-          if (state) {
-            setIsPlaying(!state.paused);
-          }
-        });
-
-        spotifyPlayer.connect().then(success => {
-          if (success) {
-            console.log('✅ Spotify Player 연결 성공!');
-          }
-        });
-
-        setPlayer(spotifyPlayer);
+        console.log('🔵 Spotify SDK Ready');
+        initializePlayer();
       };
 
-      // SDK가 이미 로드되어 있다면
+      // SDK가 이미 로드되어 있다면 바로 초기화
       if (window.Spotify) {
-        window.onSpotifyWebPlaybackSDKReady();
+        initializePlayer();
       }
     }
 
@@ -119,6 +83,82 @@ function App() {
       }
     };
   }, [accessToken, player]);
+
+  const initializePlayer = () => {
+    if (!accessToken || player) return;
+
+    const spotifyPlayer = new window.Spotify.Player({
+      name: 'Emotion Tracks Player',
+      getOAuthToken: cb => { cb(accessToken); },
+      volume: 0.5
+    });
+
+    spotifyPlayer.addListener('initialization_error', ({ message }) => {
+      console.error('❌ 초기화 에러:', message);
+    });
+    spotifyPlayer.addListener('authentication_error', ({ message }) => {
+      console.error('❌ 인증 에러:', message);
+    });
+    spotifyPlayer.addListener('account_error', ({ message }) => {
+      console.error('❌ 계정 에러:', message);
+    });
+    spotifyPlayer.addListener('playback_error', ({ message }) => {
+      console.error('❌ 재생 에러:', message);
+    });
+
+    spotifyPlayer.addListener('ready', ({ device_id }) => {
+      console.log('✅ Spotify Player Ready! Device ID:', device_id);
+      setDeviceId(device_id);
+      setPlayerReady(true);
+    });
+
+    spotifyPlayer.addListener('not_ready', ({ device_id }) => {
+      console.log('⚠️ Device ID has gone offline', device_id);
+    });
+
+    spotifyPlayer.addListener('player_state_changed', state => {
+      if (state) {
+        setIsPlaying(!state.paused);
+        setCurrentPosition(state.position);
+        setDuration(state.duration);
+        
+        if (state.paused && state.position === 0 && state.track_window.previous_tracks.length > 0) {
+          console.log('🔵 곡 종료 감지');
+          handleTrackEnd();
+        }
+      }
+    });
+
+    spotifyPlayer.connect().then(success => {
+      if (success) {
+        console.log('✅ Spotify Player 연결 성공!');
+      }
+    });
+
+    setPlayer(spotifyPlayer);
+  };
+
+  useEffect(() => {
+    if (isPlaying && player) {
+      positionIntervalRef.current = setInterval(async () => {
+        const state = await player.getCurrentState();
+        if (state) {
+          setCurrentPosition(state.position);
+          setDuration(state.duration);
+        }
+      }, 1000);
+    } else {
+      if (positionIntervalRef.current) {
+        clearInterval(positionIntervalRef.current);
+      }
+    }
+
+    return () => {
+      if (positionIntervalRef.current) {
+        clearInterval(positionIntervalRef.current);
+      }
+    };
+  }, [isPlaying, player]);
 
   useEffect(() => {
     if (showWebcam) {
@@ -145,21 +185,19 @@ function App() {
       }
     } catch (error) {
       console.error('❌ 로그인 에러:', error);
-      alert('로그인 중 오류가 발생했습니다.\n\n' + 
-            '백엔드 서버가 실행 중인지 확인하세요.');
+      alert('로그인 중 오류가 발생했습니다.');
     }
   };
 
   const handleCallback = async (code) => {
     try {
-      console.log('🔵🔵🔵 인증 콜백 처리 시작 🔵🔵🔵');
+      console.log('🔵 인증 콜백 처리 시작');
       console.log('🔵 받은 code:', code);
       
       if (!code) {
         throw new Error('인증 코드가 없습니다');
       }
       
-      console.log('🔵 백엔드에 인증 요청 전송 중...');
       const data = await API.authenticateWithCode(code);
       
       console.log('✅ 인증 성공!');
@@ -174,17 +212,13 @@ function App() {
       sessionStorage.removeItem('spotify_auth_processing');
       window.history.replaceState({}, document.title, '/');
       
-      console.log('✅✅✅ 로그인 완료! ✅✅✅');
     } catch (error) {
-      console.error('❌❌❌ 인증 에러 ❌❌❌');
-      console.error('❌ 에러:', error);
+      console.error('❌ 인증 에러:', error);
       
       sessionStorage.removeItem('spotify_auth_processing');
       window.history.replaceState({}, document.title, '/');
       
-      alert('인증 중 오류가 발생했습니다.\n\n' + 
-            '다시 로그인을 시도해주세요.\n\n' +
-            '에러: ' + (error.response?.data?.details || error.message));
+      alert('인증 중 오류가 발생했습니다.');
     }
   };
 
@@ -200,11 +234,13 @@ function App() {
     setCurrentEmotion(null);
     setRecommendations([]);
     setCurrentTrack(null);
+    setSelectedTrack(null);
     setShowWebcam(false);
     setIsDetecting(false);
     setPlayer(null);
     setDeviceId(null);
     setPlayerReady(false);
+    setRecentTracks([]);
   };
 
   const refreshAccessToken = async () => {
@@ -225,7 +261,6 @@ function App() {
     }
   };
 
-  // 웹캠 시작
   const startWebcam = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -237,12 +272,11 @@ function App() {
       }
     } catch (err) {
       console.error('❌ 웹캠 에러:', err);
-      alert('웹캠에 접근할 수 없습니다.\n카메라 권한을 확인해주세요.');
+      alert('웹캠에 접근할 수 없습니다.');
       setShowWebcam(false);
     }
   };
 
-  // 웹캠 중지
   const stopWebcam = () => {
     if (videoRef.current && videoRef.current.srcObject) {
       const tracks = videoRef.current.srcObject.getTracks();
@@ -251,7 +285,6 @@ function App() {
     }
   };
 
-  // 감정 감지 시작/중지
   const toggleDetection = () => {
     if (isDetecting) {
       setIsDetecting(false);
@@ -261,7 +294,6 @@ function App() {
     }
   };
 
-  // 감정 감지 (시뮬레이션)
   const detectEmotion = async () => {
     if (!isDetecting) return;
 
@@ -279,7 +311,6 @@ function App() {
     }, 3000);
   };
 
-  // 웹캠에서 감지된 감정으로 음악 추천
   const useDetectedEmotion = () => {
     if (detectedEmotion) {
       selectEmotion(detectedEmotion);
@@ -299,6 +330,7 @@ function App() {
 
     setIsLoading(true);
     setRecommendations([]);
+    setSelectedTrack(null);
     
     try {
       await API.detectEmotion(emotion, 1.0, new Date().toISOString());
@@ -306,10 +338,10 @@ function App() {
       
       if (data.tracks && data.tracks.length > 0) {
         setRecommendations(data.tracks);
-        setCurrentTrack(data.tracks[0]);
+        setSelectedTrack(data.tracks[0]);
         console.log('✅ 추천 곡:', data.tracks.length, '개');
       } else {
-        alert('추천 음악을 찾을 수 없습니다. 다시 시도해주세요.');
+        alert('추천 음악을 찾을 수 없습니다.');
       }
     } catch (error) {
       console.error('❌ 추천 로드 에러:', error);
@@ -321,7 +353,7 @@ function App() {
             const retryData = await API.getRecommendationsByEmotion(emotion, newToken, 7);
             if (retryData.tracks && retryData.tracks.length > 0) {
               setRecommendations(retryData.tracks);
-              setCurrentTrack(retryData.tracks[0]);
+              setSelectedTrack(retryData.tracks[0]);
             }
           } catch (retryError) {
             alert('추천 음악을 불러오는 중 오류가 발생했습니다.');
@@ -335,13 +367,20 @@ function App() {
     }
   };
 
+  // 트랙 선택 (재생 X)
   const handleTrackSelect = (track) => {
     console.log('🔵 트랙 선택:', track.name);
-    setCurrentTrack(track);
+    setSelectedTrack(track);
   };
 
-  // Spotify에서 트랙 재생
-  const playTrack = async (uri) => {
+  const addToRecentTracks = (track) => {
+    setRecentTracks(prev => {
+      const filtered = prev.filter(t => t.id !== track.id);
+      return [track, ...filtered].slice(0, 10);
+    });
+  };
+
+  const playTrack = async (uri, track) => {
     if (!playerReady || !deviceId) {
       alert('Spotify Player가 준비 중입니다. 잠시 후 다시 시도해주세요.');
       return;
@@ -350,7 +389,6 @@ function App() {
     try {
       console.log('🔵 재생 요청:', uri);
       
-      // Spotify API로 재생 요청
       await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
         method: 'PUT',
         headers: {
@@ -364,13 +402,67 @@ function App() {
 
       console.log('✅ 재생 시작!');
       setIsPlaying(true);
+      setCurrentTrack(track);
+      
+      if (track) {
+        addToRecentTracks(track);
+      }
     } catch (error) {
       console.error('❌ 재생 에러:', error);
-      alert('재생 중 오류가 발생했습니다.\n\nSpotify Premium 계정인지 확인해주세요.');
+      alert('재생 중 오류가 발생했습니다.');
     }
   };
 
-  // 재생/일시정지 토글
+  const handleTrackEnd = () => {
+    if (repeatMode === 'track') {
+      console.log('🔵 현재 곡 반복 재생');
+      setTimeout(() => {
+        if (currentTrack) {
+          playTrack(currentTrack.uri, currentTrack);
+        }
+      }, 500);
+    } else {
+      playNextTrack();
+    }
+  };
+
+  const playNextTrack = () => {
+    if (recommendations.length === 0) return;
+    
+    let nextTrack;
+    
+    if (shuffleMode) {
+      const randomIndex = Math.floor(Math.random() * recommendations.length);
+      nextTrack = recommendations[randomIndex];
+    } else {
+      const currentIndex = recommendations.findIndex(t => t.id === currentTrack?.id);
+      const nextIndex = (currentIndex + 1) % recommendations.length;
+      nextTrack = recommendations[nextIndex];
+    }
+    
+    console.log('🔵 다음 곡:', nextTrack.name);
+    setSelectedTrack(nextTrack);
+    
+    setTimeout(() => {
+      playTrack(nextTrack.uri, nextTrack);
+    }, 500);
+  };
+
+  const playPreviousTrack = () => {
+    if (recommendations.length === 0) return;
+    
+    const currentIndex = recommendations.findIndex(t => t.id === currentTrack?.id);
+    const prevIndex = currentIndex === 0 ? recommendations.length - 1 : currentIndex - 1;
+    const prevTrack = recommendations[prevIndex];
+    
+    console.log('🔵 이전 곡:', prevTrack.name);
+    setSelectedTrack(prevTrack);
+    
+    setTimeout(() => {
+      playTrack(prevTrack.uri, prevTrack);
+    }, 500);
+  };
+
   const togglePlayback = async () => {
     if (!player) return;
 
@@ -381,6 +473,47 @@ function App() {
       await player.resume();
       setIsPlaying(true);
     }
+  };
+
+  const toggleRepeatMode = () => {
+    const modes = ['off', 'context', 'track'];
+    const currentIndex = modes.indexOf(repeatMode);
+    const nextIndex = (currentIndex + 1) % modes.length;
+    setRepeatMode(modes[nextIndex]);
+    console.log('🔵 반복 모드:', modes[nextIndex]);
+  };
+
+  const toggleShuffleMode = () => {
+    setShuffleMode(!shuffleMode);
+    console.log('🔵 셔플 모드:', !shuffleMode);
+  };
+
+  const seekToPosition = async (percentage) => {
+    if (!player || !duration) return;
+    
+    const newPosition = Math.floor(duration * percentage);
+    console.log('🔵 위치 이동:', newPosition, 'ms');
+    
+    try {
+      await player.seek(newPosition);
+      setCurrentPosition(newPosition);
+    } catch (error) {
+      console.error('❌ 위치 이동 에러:', error);
+    }
+  };
+
+  const handleProgressBarClick = (e) => {
+    const progressBar = e.currentTarget;
+    const rect = progressBar.getBoundingClientRect();
+    const percentage = (e.clientX - rect.left) / rect.width;
+    seekToPosition(percentage);
+  };
+
+  const formatTime = (ms) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   const getEmotionText = (emotion) => {
@@ -443,9 +576,7 @@ function App() {
   return (
     <div className="macbook">
       <div className="main-container">
-        {/* 왼쪽 영역 */}
         <div className="left-section">
-          {/* 헤더 */}
           <div className="header-area">
             <div className="logo">VEMO</div>
             <div className="header-buttons">
@@ -464,7 +595,6 @@ function App() {
             </div>
           </div>
 
-          {/* 검색바 */}
           <div className="search-bar">
             <input
               type="text"
@@ -473,7 +603,6 @@ function App() {
             />
           </div>
 
-          {/* 감정 선택 버튼 */}
           <div className="emotion-buttons-area">
             {[
               { emotion: 'happy', icon: '😊', color: '#ffd700' },
@@ -498,20 +627,21 @@ function App() {
             ))}
           </div>
 
-          {/* 추천 트랙 섹션 */}
           <div className="recommend-section">
-            <div className="recommend-title">Recommend Track</div>
             <div className="recommend-subtitle">
               Emotion track - {currentEmotion ? getEmotionText(currentEmotion) : '(emotion)'}
+            </div>
+            <div className="recommend-title">
+              {selectedTrack ? `${selectedTrack.name} - ${selectedTrack.artists.join(', ')}` : 'Recommend Track'}
             </div>
             <div
               className="play-button"
               onClick={() => {
-                if (currentTrack && currentTrack.uri) {
-                  if (isPlaying) {
+                if (selectedTrack && selectedTrack.uri) {
+                  if (currentTrack && currentTrack.id === selectedTrack.id && isPlaying) {
                     togglePlayback();
                   } else {
-                    playTrack(currentTrack.uri);
+                    playTrack(selectedTrack.uri, selectedTrack);
                   }
                 } else {
                   alert('재생할 트랙을 선택해주세요!');
@@ -519,19 +649,89 @@ function App() {
               }}
             >
               <div className="play-button-text">
-                {isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
+                {currentTrack && selectedTrack && currentTrack.id === selectedTrack.id && isPlaying ? '⏸ PAUSE' : '▶ PLAY'}
               </div>
             </div>
           </div>
 
-          {/* Weekly Top Track */}
-          <div className="section-title">Weekly Top Track</div>
-
-          {/* Recent Emotion Tracks */}
           <div className="section-title" style={{ marginTop: '30px' }}>Recent Emotion Tracks</div>
+          
+          <div style={{ marginTop: '15px' }}>
+            {recentTracks.length === 0 ? (
+              <div style={{ 
+                textAlign: 'center', 
+                color: '#666', 
+                fontSize: '14px',
+                padding: '20px'
+              }}>
+                재생한 곡이 없습니다
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {recentTracks.slice(0, 5).map((track, index) => (
+                  <div
+                    key={`${track.id}-${index}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px',
+                      background: 'rgba(255, 255, 255, 0.5)',
+                      borderRadius: '10px',
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease'
+                    }}
+                    onClick={() => {
+                      setSelectedTrack(track);
+                      playTrack(track.uri, track);
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.7)'}
+                    onMouseOut={(e) => e.currentTarget.style.background = 'rgba(255, 255, 255, 0.5)'}
+                  >
+                    {track.album.images[2] && (
+                      <img
+                        src={track.album.images[2].url}
+                        alt={track.album.name}
+                        style={{
+                          width: '40px',
+                          height: '40px',
+                          borderRadius: '5px',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    )}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{
+                        fontFamily: '"Raleway-Medium", Helvetica',
+                        fontWeight: 500,
+                        color: '#000',
+                        fontSize: '13px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap'
+                      }}>
+                        {track.name}
+                      </div>
+                      <div style={{
+                        fontFamily: '"Raleway-Medium", Helvetica',
+                        fontWeight: 500,
+                        color: '#00000052',
+                        fontSize: '11px',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        marginTop: '4px'
+                      }}>
+                        {track.artists.join(', ')}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* 오른쪽 영역 - 트랙 리스트 */}
         {currentEmotion && (
           <div className="right-section">
             <div className="tracks-title">{getEmotionText(currentEmotion)} Tracks</div>
@@ -540,10 +740,10 @@ function App() {
               <div className="loading-text">불러오는 중...</div>
             ) : (
               <div className="track-list">
-                {recommendations.slice(0, 7).map((track, index) => (
+                {recommendations.slice(0, 7).map((track) => (
                   <div
                     key={track.id}
-                    className={`track-item ${currentTrack && currentTrack.id === track.id ? 'special' : ''}`}
+                    className={`track-item ${selectedTrack && selectedTrack.id === track.id ? 'special' : ''}`}
                     onClick={() => handleTrackSelect(track)}
                   >
                     {track.album.images[2] && (
@@ -566,7 +766,6 @@ function App() {
         )}
       </div>
 
-      {/* 웹캠 모달 */}
       {showWebcam && (
         <div style={{
           position: 'fixed',
@@ -667,7 +866,6 @@ function App() {
         </div>
       )}
 
-      {/* 하단 재생 바 */}
       {currentTrack && (
         <div className="bottom-player">
           {currentTrack.album.images[2] && (
@@ -685,27 +883,111 @@ function App() {
 
           <div className="player-controls">
             <button
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: shuffleMode ? '#64bdea' : 'transparent',
+                border: shuffleMode ? 'none' : '2px solid #666',
+                color: shuffleMode ? '#000' : '#fff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onClick={toggleShuffleMode}
+              title="셔플"
+            >
+              🔀
+            </button>
+
+            <button
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'transparent',
+                border: '2px solid #666',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onClick={playPreviousTrack}
+              title="이전 곡"
+            >
+              ⏮
+            </button>
+
+            <button
               className="play-pause-btn"
               onClick={() => {
                 if (currentTrack.uri) {
-                  if (isPlaying) {
-                    togglePlayback();
-                  } else {
-                    playTrack(currentTrack.uri);
-                  }
+                  togglePlayback();
                 }
               }}
             >
               {isPlaying ? '⏸' : '▶'}
             </button>
 
+            <button
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: 'transparent',
+                border: '2px solid #666',
+                color: '#fff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              onClick={playNextTrack}
+              title="다음 곡"
+            >
+              ⏭
+            </button>
+
+            <button
+              style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                background: repeatMode !== 'off' ? '#64bdea' : 'transparent',
+                border: repeatMode !== 'off' ? 'none' : '2px solid #666',
+                color: repeatMode !== 'off' ? '#000' : '#fff',
+                cursor: 'pointer',
+                fontSize: '14px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'relative'
+              }}
+              onClick={toggleRepeatMode}
+              title={repeatMode === 'off' ? '반복 끄기' : repeatMode === 'track' ? '한 곡 반복' : '전체 반복'}
+            >
+              {repeatMode === 'track' ? '🔂' : '🔁'}
+            </button>
+
             <div className="progress-bar-container">
-              <div className="progress-bar">
-                <div className="progress-fill"></div>
+              <div 
+                className="progress-bar"
+                onClick={handleProgressBarClick}
+                style={{ cursor: 'pointer' }}
+              >
+                <div 
+                  className="progress-fill"
+                  style={{ width: `${duration > 0 ? (currentPosition / duration) * 100 : 0}%` }}
+                ></div>
               </div>
               <div className="time-labels">
-                <span>0:00</span>
-                <span>{Math.floor(currentTrack.duration_ms / 60000)}:{String(Math.floor((currentTrack.duration_ms % 60000) / 1000)).padStart(2, '0')}</span>
+                <span>{formatTime(currentPosition)}</span>
+                <span>{formatTime(duration)}</span>
               </div>
             </div>
           </div>
