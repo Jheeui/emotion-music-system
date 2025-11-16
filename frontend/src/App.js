@@ -861,7 +861,7 @@ function App() {
           </div>
           
           <p style={{ marginTop: '15px', fontSize: '12px', color: '#999' }}>
-            💡 팀원 A의 감정 인식 모델로 교체 예정
+            
           </p>
         </div>
       )}
