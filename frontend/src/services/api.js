@@ -36,12 +36,36 @@ class API {
     return response.data;
   }
 
-  async getRecommendationsByEmotion(emotion, accessToken, limit = 20) {
+  async getRecommendationsByEmotion(emotion, accessToken, limit = 20, userPreferences = null) {
     const response = await this.client.post('/recommendation/by-emotion', {
       emotion,
       accessToken,
-      limit
+      limit,
+      userPreferences
     });
+    return response.data;
+  }
+
+  async detectEmotionFromImage(imageData) {
+    const response = await this.client.post('/emotion/detect-from-image', {
+      image: imageData
+    });
+    return response.data;
+  }
+
+  async saveListeningHistory(userId, emotion, trackId, trackName, timestamp = null) {
+    const response = await this.client.post('/history/save', {
+      userId,
+      emotion,
+      trackId,
+      trackName,
+      timestamp: timestamp || new Date().toISOString()
+    });
+    return response.data;
+  }
+
+  async getTimeBasedSuggestion(userId) {
+    const response = await this.client.get(`/history/time-suggestion/${userId}`);
     return response.data;
   }
 }

@@ -4,12 +4,13 @@ const RecommendationService = require('../services/recommendationService');
 
 router.post('/by-emotion', async (req, res) => {
   try {
-    const { emotion, accessToken, limit = 20 } = req.body;
+    const { emotion, accessToken, limit = 20, userPreferences } = req.body;
 
     console.log('🔵 추천 요청 받음');
     console.log('🔵 감정:', emotion);
     console.log('🔵 토큰 있음:', !!accessToken);
     console.log('🔵 limit:', limit);
+    console.log('🔵 사용자 선호도:', userPreferences);
 
     if (!emotion) {
       console.error('❌ 감정이 제공되지 않음');
@@ -22,7 +23,11 @@ router.post('/by-emotion', async (req, res) => {
     }
 
     const recommendationService = new RecommendationService(accessToken);
-    const recommendations = await recommendationService.getRecommendationsByEmotion(emotion, limit);
+    const recommendations = await recommendationService.getRecommendationsByEmotion(
+      emotion, 
+      limit,
+      userPreferences
+    );
 
     if (!recommendations || recommendations.length === 0) {
       console.warn('⚠️ 추천 결과 없음');
@@ -38,13 +43,12 @@ router.post('/by-emotion', async (req, res) => {
     res.json({
       emotion,
       count: recommendations.length,
-      tracks: recommendations
+      tracks: recommendations,
+      personalized: !!userPreferences
     });
     
   } catch (error) {
     console.error('❌ 추천 라우트 에러:', error);
-    console.error('❌ 에러 메시지:', error.message);
-    console.error('❌ 에러 스택:', error.stack);
     
     if (error.statusCode === 401) {
       return res.status(401).json({ 

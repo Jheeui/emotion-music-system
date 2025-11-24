@@ -5,47 +5,53 @@ class RecommendationService {
     this.spotifyService = new SpotifyService(accessToken);
   }
 
-  async getRecommendationsByEmotion(userEmotion, limit = 20) {
+  async getRecommendationsByEmotion(userEmotion, limit = 20, userPreferences = null) {
     try {
       console.log('🔵 추천 서비스 시작, 감정:', userEmotion);
+      console.log('🔵 사용자 선호도:', userPreferences);
       
-      // 감정별 검색 키워드 (더 다양하게!)
+      // 개인화된 감정별 검색 키워드
       const emotionKeywords = {
-        happy: [
-          'happy songs', 'feel good music', 'upbeat pop', 'cheerful hits',
-          'joyful music', 'positive vibes', 'sunshine songs', 'party hits',
-          'dance pop', 'uplifting tracks', 'good mood', 'fun music',
-          'celebration songs', 'happy beats', 'smile songs'
-        ],
-        sad: [
-          'sad songs', 'emotional ballads', 'melancholy music', 'heartbreak songs',
-          'tearjerker', 'lonely songs', 'breakup music', 'cry songs',
-          'emotional music', 'sad piano', 'melancholic', 'sorrowful',
-          'grief songs', 'nostalgic music', 'blue mood'
-        ],
-        energetic: [
-          'workout music', 'pump up songs', 'energetic hits', 'party music',
-          'power songs', 'intense music', 'adrenaline rush', 'high energy',
-          'motivation music', 'gym playlist', 'cardio music', 'running songs',
-          'beast mode', 'power workout', 'energy boost'
-        ],
-        calm: [
-          'chill music', 'relaxing songs', 'peaceful melodies', 'calm vibes',
-          'meditation music', 'ambient sounds', 'soft music', 'tranquil',
-          'soothing songs', 'zen music', 'calm piano', 'study music',
-          'lofi beats', 'peaceful piano', 'relaxation'
-        ]
+        happy: {
+          upbeat: ['upbeat pop', 'happy dance', 'party hits', 'feel good music', 'celebration songs'],
+          cheerful: ['cheerful music', 'sunshine songs', 'joyful music', 'positive vibes', 'happy beats'],
+          energetic: ['energetic pop', 'fun music', 'dance pop', 'uplifting tracks', 'good mood']
+        },
+        sad: {
+          melancholic: ['sad ballads', 'melancholy music', 'emotional songs', 'heartbreak songs', 'tearjerker'],
+          uplifting: ['hopeful music', 'uplifting ballads', 'inspirational songs', 'healing music', 'comfort songs'],
+          calm: ['sad piano', 'quiet sadness', 'peaceful sadness', 'gentle melancholy', 'soft emotional']
+        },
+        energetic: {
+          intense: ['intense rock', 'powerful music', 'aggressive beats', 'hard rock', 'metal workout'],
+          workout: ['workout music', 'gym playlist', 'cardio music', 'motivation music', 'power songs'],
+          dance: ['edm', 'electronic dance', 'club music', 'dance hits', 'high energy dance']
+        },
+        calm: {
+          ambient: ['ambient music', 'atmospheric sounds', 'meditation music', 'zen music', 'background music'],
+          acoustic: ['acoustic songs', 'calm piano', 'guitar instrumental', 'peaceful acoustic', 'soft instrumental'],
+          soft: ['soft music', 'relaxing songs', 'calm vocals', 'soothing songs', 'lofi beats']
+        }
       };
 
-      const allKeywords = emotionKeywords[userEmotion] || ['popular music'];
-      
+      // 사용자 선호도에 따라 키워드 선택
+      let selectedKeywords;
+      if (userPreferences && userPreferences[userEmotion]) {
+        const userPref = userPreferences[userEmotion];
+        console.log(`🔵 ${userEmotion} 감정에 대한 사용자 선호: ${userPref}`);
+        selectedKeywords = emotionKeywords[userEmotion][userPref] || 
+                          Object.values(emotionKeywords[userEmotion]).flat();
+      } else {
+        selectedKeywords = Object.values(emotionKeywords[userEmotion]).flat();
+      }
+
       // 랜덤으로 4개 키워드 선택
-      const selectedKeywords = this.getRandomKeywords(allKeywords, 4);
-      console.log('🔵 선택된 검색 키워드:', selectedKeywords);
+      const keywords = this.getRandomKeywords(selectedKeywords, 4);
+      console.log('🔵 선택된 검색 키워드:', keywords);
       
       // 여러 검색 결과 수집
       let allTracks = [];
-      for (const keyword of selectedKeywords) {
+      for (const keyword of keywords) {
         try {
           console.log('🔵 검색:', keyword);
           const tracks = await this.spotifyService.searchTracks(keyword, 15);
@@ -78,7 +84,7 @@ class RecommendationService {
       // 랜덤 셔플
       const shuffledTracks = this.shuffleArray([...uniqueTracks]);
       
-      // 트랙 정보만 반환 (오디오 특성 없이)
+      // 트랙 정보만 반환
       const finalTracks = shuffledTracks.slice(0, limit).map(track => ({
         id: track.id,
         name: track.name,
@@ -91,7 +97,8 @@ class RecommendationService {
         preview_url: track.preview_url,
         uri: track.uri,
         emotion: userEmotion,
-        matchScore: Math.floor(75 + Math.random() * 20) // 75-95 랜덤 점수
+        matchScore: Math.floor(75 + Math.random() * 20),
+        preference: userPreferences ? userPreferences[userEmotion] : 'default'
       }));
       
       console.log('✅ 최종 추천 곡:', finalTracks.length, '개');
@@ -99,7 +106,6 @@ class RecommendationService {
       
     } catch (error) {
       console.error('❌ 추천 서비스 에러:', error);
-      console.error('❌ 에러 상세:', error.message);
       
       if (error.statusCode === 401) {
         throw new Error('Spotify 인증이 만료되었습니다. 다시 로그인해주세요.');

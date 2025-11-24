@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import API from './services/api';
+import InitialSurvey from './components/InitialSurvey';
+import WebcamEmotionDetector from './components/WebcamEmotionDetector';
+import TimeBasedSuggestion from './components/TimeBasedSuggestion';
 import './globals.css';
 import './style.css';
 
@@ -10,14 +13,14 @@ function App() {
   const [currentEmotion, setCurrentEmotion] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
   const [currentTrack, setCurrentTrack] = useState(null);
-  const [selectedTrack, setSelectedTrack] = useState(null); // 선택된 트랙 (재생 X)
+  const [selectedTrack, setSelectedTrack] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   
-  const [showWebcam, setShowWebcam] = useState(false);
-  const [isDetecting, setIsDetecting] = useState(false);
-  const [detectedEmotion, setDetectedEmotion] = useState(null);
-  const [confidence, setConfidence] = useState(0);
-  const videoRef = useRef(null);
+  // 새로 추가된 state들
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [userPreferences, setUserPreferences] = useState(null);
+  const [showWebcamDetector, setShowWebcamDetector] = useState(false);
+  const [userId] = useState('user_' + Date.now());
 
   const [player, setPlayer] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
@@ -61,17 +64,29 @@ function App() {
     }
   }, []);
 
+  // 설문조사 완료 여부 확인
+  useEffect(() => {
+    const surveyCompleted = localStorage.getItem('survey_completed');
+    const savedPreferences = localStorage.getItem('user_music_preferences');
+    
+    if (surveyCompleted && savedPreferences) {
+      setUserPreferences(JSON.parse(savedPreferences));
+      console.log('✅ 저장된 사용자 선호도:', JSON.parse(savedPreferences));
+    } else if (isAuthenticated) {
+      // 로그인했는데 설문조사 안 했으면 보여주기
+      setShowSurvey(true);
+    }
+  }, [isAuthenticated]);
+
   useEffect(() => {
     if (accessToken && !player) {
       console.log('🔵 Spotify Player 초기화 시작');
       
-      // SDK 로드 전에 콜백 함수 먼저 정의
       window.onSpotifyWebPlaybackSDKReady = () => {
         console.log('🔵 Spotify SDK Ready');
         initializePlayer();
       };
 
-      // SDK가 이미 로드되어 있다면 바로 초기화
       if (window.Spotify) {
         initializePlayer();
       }
@@ -160,16 +175,6 @@ function App() {
     };
   }, [isPlaying, player]);
 
-  useEffect(() => {
-    if (showWebcam) {
-      startWebcam();
-    } else {
-      stopWebcam();
-    }
-    
-    return () => stopWebcam();
-  }, [showWebcam]);
-
   const handleLogin = async () => {
     try {
       console.log('🔵 로그인 시도...');
@@ -235,12 +240,13 @@ function App() {
     setRecommendations([]);
     setCurrentTrack(null);
     setSelectedTrack(null);
-    setShowWebcam(false);
-    setIsDetecting(false);
     setPlayer(null);
     setDeviceId(null);
     setPlayerReady(false);
     setRecentTracks([]);
+    setShowSurvey(false);
+    setUserPreferences(null);
+    setShowWebcamDetector(false);
   };
 
   const refreshAccessToken = async () => {
@@ -261,66 +267,9 @@ function App() {
     }
   };
 
-  const startWebcam = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 }
-      });
-      
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch (err) {
-      console.error('❌ 웹캠 에러:', err);
-      alert('웹캠에 접근할 수 없습니다.');
-      setShowWebcam(false);
-    }
-  };
-
-  const stopWebcam = () => {
-    if (videoRef.current && videoRef.current.srcObject) {
-      const tracks = videoRef.current.srcObject.getTracks();
-      tracks.forEach(track => track.stop());
-      videoRef.current.srcObject = null;
-    }
-  };
-
-  const toggleDetection = () => {
-    if (isDetecting) {
-      setIsDetecting(false);
-    } else {
-      setIsDetecting(true);
-      detectEmotion();
-    }
-  };
-
-  const detectEmotion = async () => {
-    if (!isDetecting) return;
-
-    const emotions = ['happy', 'sad', 'energetic', 'calm'];
-    const randomEmotion = emotions[Math.floor(Math.random() * emotions.length)];
-    const randomConfidence = 0.7 + Math.random() * 0.3;
-
-    setDetectedEmotion(randomEmotion);
-    setConfidence(randomConfidence);
-
-    setTimeout(() => {
-      if (isDetecting) {
-        detectEmotion();
-      }
-    }, 3000);
-  };
-
-  const useDetectedEmotion = () => {
-    if (detectedEmotion) {
-      selectEmotion(detectedEmotion);
-      setShowWebcam(false);
-      setIsDetecting(false);
-    }
-  };
-
   const selectEmotion = async (emotion) => {
     console.log('🔵 감정 선택:', emotion);
+    console.log('🔵 사용자 선호도:', userPreferences);
     setCurrentEmotion(emotion);
     
     if (!isAuthenticated || !accessToken) {
@@ -334,12 +283,23 @@ function App() {
     
     try {
       await API.detectEmotion(emotion, 1.0, new Date().toISOString());
-      const data = await API.getRecommendationsByEmotion(emotion, accessToken, 7);
+      
+      // userPreferences 추가!
+      const data = await API.getRecommendationsByEmotion(
+        emotion, 
+        accessToken, 
+        7,
+        userPreferences
+      );
       
       if (data.tracks && data.tracks.length > 0) {
         setRecommendations(data.tracks);
         setSelectedTrack(data.tracks[0]);
         console.log('✅ 추천 곡:', data.tracks.length, '개');
+        
+        if (data.personalized) {
+          console.log('🎯 개인 선호도 적용됨');
+        }
       } else {
         alert('추천 음악을 찾을 수 없습니다.');
       }
@@ -350,7 +310,12 @@ function App() {
         const newToken = await refreshAccessToken();
         if (newToken) {
           try {
-            const retryData = await API.getRecommendationsByEmotion(emotion, newToken, 7);
+            const retryData = await API.getRecommendationsByEmotion(
+              emotion, 
+              newToken, 
+              7,
+              userPreferences
+            );
             if (retryData.tracks && retryData.tracks.length > 0) {
               setRecommendations(retryData.tracks);
               setSelectedTrack(retryData.tracks[0]);
@@ -367,7 +332,6 @@ function App() {
     }
   };
 
-  // 트랙 선택 (재생 X)
   const handleTrackSelect = (track) => {
     console.log('🔵 트랙 선택:', track.name);
     setSelectedTrack(track);
@@ -406,6 +370,21 @@ function App() {
       
       if (track) {
         addToRecentTracks(track);
+      }
+
+      // 청취 기록 저장 추가!
+      if (track && currentEmotion) {
+        try {
+          await API.saveListeningHistory(
+            userId,
+            currentEmotion,
+            track.id,
+            track.name
+          );
+          console.log('✅ 청취 기록 저장');
+        } catch (error) {
+          console.error('❌ 청취 기록 저장 실패:', error);
+        }
       }
     } catch (error) {
       console.error('❌ 재생 에러:', error);
@@ -575,6 +554,28 @@ function App() {
 
   return (
     <div className="macbook">
+      {/* 설문조사 팝업 */}
+      {showSurvey && (
+        <InitialSurvey 
+          onComplete={(preferences) => {
+            console.log('✅ 설문조사 완료:', preferences);
+            setUserPreferences(preferences);
+            setShowSurvey(false);
+          }} 
+        />
+      )}
+      
+      {/* 웹캠 감정 인식 */}
+      {showWebcamDetector && (
+        <WebcamEmotionDetector
+          onEmotionDetected={(emotion) => {
+            console.log('✅ 웹캠에서 감정 감지:', emotion);
+            selectEmotion(emotion);
+          }}
+          onClose={() => setShowWebcamDetector(false)}
+        />
+      )}
+
       <div className="main-container">
         <div className="left-section">
           <div className="header-area">
@@ -584,11 +585,33 @@ function App() {
                 <div className="player-status">🎵 Player 로딩 중...</div>
               )}
               <button
-                onClick={() => setShowWebcam(!showWebcam)}
-                className={showWebcam ? "btn-warning" : "btn-primary"}
+                onClick={() => setShowWebcamDetector(true)}
+                className="btn-primary"
               >
-                📹 웹캠 {showWebcam ? '닫기' : '열기'}
+                📹 웹캠 인식
               </button>
+              {userPreferences && (
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('survey_completed');
+                    localStorage.removeItem('user_music_preferences');
+                    setUserPreferences(null);
+                    setShowSurvey(true);
+                  }}
+                  style={{
+                    padding: '10px 20px',
+                    background: '#9c27b0',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '20px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: 'bold'
+                  }}
+                >
+                  ⚙️ 설문 재설정
+                </button>
+              )}
               <button onClick={handleLogout} className="btn-danger">
                 로그아웃
               </button>
@@ -602,6 +625,12 @@ function App() {
               readOnly
             />
           </div>
+
+          {/* 시간대별 추천 */}
+          <TimeBasedSuggestion 
+            userId={userId}
+            onEmotionSelect={selectEmotion}
+          />
 
           <div className="emotion-buttons-area">
             {[
@@ -765,106 +794,6 @@ function App() {
           </div>
         )}
       </div>
-
-      {showWebcam && (
-        <div style={{
-          position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'white',
-          padding: '30px',
-          borderRadius: '20px',
-          boxShadow: '0 10px 50px rgba(0,0,0,0.3)',
-          zIndex: 2000,
-          textAlign: 'center'
-        }}>
-          <h2 style={{ marginBottom: '20px', color: '#333' }}>🎭 웹캠 감정 인식</h2>
-          
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            muted
-            width="480"
-            height="360"
-            style={{ 
-              border: '3px solid #64bdea', 
-              borderRadius: '15px',
-              marginBottom: '20px'
-            }}
-          />
-          
-          {detectedEmotion && (
-            <div style={{
-              padding: '20px',
-              background: '#f0f8ff',
-              borderRadius: '10px',
-              marginBottom: '20px'
-            }}>
-              <div style={{ fontSize: '48px', marginBottom: '10px' }}>
-                {getEmotionIcon(detectedEmotion)}
-              </div>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#333', marginBottom: '5px' }}>
-                {detectedEmotion.toUpperCase()}
-              </div>
-              <div style={{ fontSize: '14px', color: '#666' }}>
-                신뢰도: {(confidence * 100).toFixed(1)}%
-              </div>
-            </div>
-          )}
-          
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-            <button
-              onClick={toggleDetection}
-              className={isDetecting ? "btn-danger" : "btn-primary"}
-            >
-              {isDetecting ? '⏸ 감지 중지' : '▶ 감지 시작'}
-            </button>
-            
-            {detectedEmotion && (
-              <button
-                onClick={useDetectedEmotion}
-                style={{
-                  padding: '12px 30px',
-                  fontSize: '16px',
-                  background: '#4caf50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                ✓ 이 감정으로 추천받기
-              </button>
-            )}
-            
-            <button
-              onClick={() => {
-                setShowWebcam(false);
-                setIsDetecting(false);
-              }}
-              style={{
-                padding: '12px 30px',
-                fontSize: '16px',
-                background: '#9e9e9e',
-                color: 'white',
-                border: 'none',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                fontWeight: 'bold'
-              }}
-            >
-              닫기
-            </button>
-          </div>
-          
-          <p style={{ marginTop: '15px', fontSize: '12px', color: '#999' }}>
-            
-          </p>
-        </div>
-      )}
 
       {currentTrack && (
         <div className="bottom-player">

@@ -1,0 +1,42 @@
+[
+  {
+    "userId": "user_1763990726669",
+    "emotion": "happy",
+    "trackId": "6fkPFcktjMGeGhQDKF8ABE",
+    "trackName": "祝祭のうた",
+    "timestamp": "2025-11-24T13:25:58.810Z",
+    "hour": 22,
+    "dayOfWeek": 1,
+    "date": "2025-11-24"
+  },
+  {
+    "userId": "user_1763990842933",
+    "emotion": "calm",
+    "trackId": "403Du6LhTuUoJi6KBDLmpx",
+    "trackName": "Love Songs - Acoustic",
+    "timestamp": "2025-11-24T13:27:39.339Z",
+    "hour": 22,
+    "dayOfWeek": 1,
+    "date": "2025-11-24"
+  },
+  {
+    "userId": "user_1763990842933",
+    "emotion": "calm",
+    "trackId": "6d1I1HW2MDb8kFbMFUR518",
+    "trackName": "Calm Piano",
+    "timestamp": "2025-11-24T13:27:42.343Z",
+    "hour": 22,
+    "dayOfWeek": 1,
+    "date": "2025-11-24"
+  },
+  {
+    "userId": "user_1763990876912",
+    "emotion": "calm",
+    "trackId": "1ySgmcM7rIXu5QbVr17F61",
+    "trackName": "Sleeping Petals",
+    "timestamp": "2025-11-24T13:28:07.436Z",
+    "hour": 22,
+    "dayOfWeek": 1,
+    "date": "2025-11-24"
+  }
+]
